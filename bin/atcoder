@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+set -e
+
+__ATCODER_WORKSPACE_DIR="$(cd $(dirname $0) && cd ../ && pwd)"
+
+#
+# Store `cargo-compete` credentials under your workspace folder
+#   ref: https://github.com/qryxip/cargo-compete#cookies-and-tokens
+#
+export XDG_DATA_HOME="$__ATCODER_WORKSPACE_DIR/.local/share"
+
+#
+# Store platform tests under your workspace folder
+# This behavior is undocumented :(
+#
+export XDG_CACHE_HOME="$__ATCODER_WORKSPACE_DIR/.cache"
+
+CARGO_COMPETE_SUBCOMMAND="$1"
+case "$CARGO_COMPETE_SUBCOMMAND" in
+    'init' | 'i' | 'login' | 'l' | 'participate' | 'p')
+        shift
+        cargo compete "$CARGO_COMPETE_SUBCOMMAND" atcoder "$@"
+        ;;
+    'new' | 'n')
+        cargo compete "$@"
+
+        #
+        # Workaround: Manage under `testcases` with `git`
+        #   ref: https://github.com/qryxip/cargo-compete/pull/198
+        #
+        find "$__ATCODER_WORKSPACE_DIR"/*/testcases -type d -empty -exec touch {}/.gitkeep \;
+        ;;
+    *)
+        cargo compete "$@"
+        ;;
+esac
